@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>网页扫雷小游戏</title>
+		<style type="text/css">
+			/*小div的样式*/
+			
+			.divclass {
+				border: 1px solid greenyellow;
+				width: 50px;
+				height: 50px;
+				float: left;
+			}
+			
+			.wangxin {}
+			
+			#isflag {
+				width: 120px;
+				height: 60px;
+				/*background-color: red;*/
+			}
+		</style>
+		<script src="js/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var myHTMLurl = "myapp_8.html";
+			//声明一个一维数组
+			var shuzu = new Array(81); //存放数字用的
+			var canput = new Array(81); //用于判断是否已经打开
+			var flag = new Array(81); //用于记录所有对象是否是flag
+			var cilckcount = 0;//记录打开了多少的格子
+			var headtime=0;//用于记录时间用
+			var sysotime;
+
+			//初始化
+			window.onload = function() {
+				//界面操作
+				//获得操作主体部分
+				var div = document.getElementById("largeDiv");
+				for(var i = 1; i <= 81; i++) {
+					//创建一个小div对象
+					var d = document.createElement("div");
+					//div对象的css格式为divclass
+					d.className = "divclass";
+					//div对象的里面img元素
+					d.innerHTML = "<img src='img/boom/-1.png' class='wangxin' onclick='clickimg(" + i + ")'/>"
+					//在大div里面添加小div对象
+					div.appendChild(d);
+				}
+
+				//数据操作
+				//初始化数据
+				for(var i = 0; i < shuzu.length; i++) {
+					shuzu[i] = 0;
+				}
+				//放炸弹
+				var count = 0; //用于记录是否够十个炸弹
+				while(count < 10) {
+					var a1 = Math.round(Math.random() * 81);
+					if(shuzu[a1] == 0) {
+						shuzu[a1] = 9;
+						count++;
+					}
+				}
+
+				//alert("王鑫是大帅哥");
+				//放炸弹旁边的字
+				for(var i = 0; i < shuzu.length; i++) {
+					shuzu[i] = getRound(i);
+				}
+				//初始化可编辑区域
+				for(var i = 0; i < canput.length; i++) {
+					canput[i] = false;
+				}
+				//初始化flag区域
+				for(var i = 0; i < flag.length; i++) {
+					flag[i] = false;
+				}
+				
+				headtime=0;//初始化时间
+
+				//用于验证是否是前面编写的是不是对的
+				//				var a = document.getElementsByClassName("wangxin");
+				//				for(var i = 0; i < a.length; i++) {
+				//					var a2 = shuzu[i];
+				//					a[i].src = "img/boom/" + a2 + ".png";
+				//				}
+			}
+			
+			//得到炸弹周围的数字
+			function getRound(numa) {
+				var num = parseInt(numa);
+				//除去炸弹
+				if(shuzu[num] == 9) {
+					return 9;
+				}
+
+				//四个角
+				if(num == 0) {
+					var abc = 0;
+					if(shuzu[1] == 9) {
+						abc++;
+					}
+					if(shuzu[9] == 9) {
+						abc++;
+					}
+					if(shuzu[10] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+				if(num == 8) {
+					var abc = 0;
+					if(shuzu[7] == 9) {
+						abc++;
+					}
+					if(shuzu[16] == 9) {
+						abc++;
+					}
+					if(shuzu[17] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+				if(num == 72) {
+					var abc = 0;
+					if(shuzu[63] == 9) {
+						abc++;
+					}
+					if(shuzu[64] == 9) {
+						abc++;
+					}
+					if(shuzu[73] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+				if(num == 80) {
+					var abc = 0;
+					if(shuzu[71] == 9) {
+						abc++;
+					}
+					if(shuzu[70] == 9) {
+						abc++;
+					}
+					if(shuzu[79] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+
+				//上底边
+				if(num < 9) {
+					var abc = 0;
+					if(shuzu[num + 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 1] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 1] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+				//下底边
+				if(num > 71) {
+					var abc = 0;
+					if(shuzu[num - 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 1] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 1] == 9) {
+						abc++;
+					}
+					return abc;
+				}
+				//左边
+				if(num == 9 || num == 18 || num == 27 || num == 36 || num == 45 || num == 54 || num == 63) {
+					var abc = 0;
+					if(shuzu[num - 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 1] == 9) {
+						abc++;
+					}
+					return abc;
+
+				}
+
+				//右边
+				if(num == 17 || num == 26 || num == 35 || num == 44 || num == 53 || num == 62 || num == 71) {
+					var abc = 0;
+					if(shuzu[num - 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 1] == 9) {
+						abc++;
+					}
+					return abc;
+
+				}
+
+				//剩下中间的区域
+				{
+					var abc = 0;
+					if(shuzu[num - 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 8] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 9] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 10] == 9) {
+						abc++;
+					}
+					if(shuzu[num + 1] == 9) {
+						abc++;
+					}
+					if(shuzu[num - 1] == 9) {
+						abc++;
+					}
+					return abc;
+
+				}
+			}
+			//展示空白区域的
+			function getkongbai(num) {
+				var i = parseInt(num);
+				//这里得到的是shuzu[i]是一个空白
+				//alert("wangxin");
+				//当当前框为空白的时候，展示四周的图片
+				//showpic(i);
+				//先展示当前图片
+				//判断特殊的位置
+				if(i < 0 || i > 80) {
+					return; //超出界面外直接返回
+				}
+				if(i == 0) {
+					showpic(i + 1);
+					showpic(i + 9);
+					showpic(i + 10);
+					return;
+				}
+				if(i == 8) {
+					showpic(i - 1);
+					showpic(i + 9);
+					showpic(i + 8);
+					return;
+				}
+				if(i == 72) {
+					showpic(i + 1);
+					showpic(i - 9);
+					showpic(i - 8);
+					return;
+				}
+				if(i == 80) {
+					showpic(i - 1);
+					showpic(i - 9);
+					showpic(i - 10);
+					return;
+				}
+				if(i == 9 || i == 18 || i == 27 || i == 36 || i == 45 || i == 54 || i == 63) {
+					showpic(i + 1);
+					showpic(i - 9);
+					showpic(i + 9);
+					showpic(i + 10);
+					showpic(i - 8);
+					return;
+				}
+				if(i == 17 || i == 35 || i == 26 || i == 44 || i == 53 || i == 62 || i == 71) {
+					showpic(i - 1);
+					showpic(i - 9);
+					showpic(i + 9);
+					showpic(i + 8);
+					showpic(i - 10);
+					return;
+				}
+				if(i > 71) {
+					showpic(i - 1);
+					showpic(i + 1);
+					showpic(i - 8);
+					showpic(i - 9);
+					showpic(i - 10);
+					return;
+				}
+				if(i < 8) {
+					showpic(i - 1);
+					showpic(i + 1);
+					showpic(i + 8);
+					showpic(i + 9);
+					showpic(i + 10);
+					return;
+				}
+				showpic(i + 1);
+				showpic(i - 1);
+				showpic(i - 9);
+				showpic(i + 9);
+				showpic(i + 8);
+				showpic(i - 8);
+				showpic(i - 10);
+				showpic(i + 10);
+				return;
+			}
+
+			//展示图片
+			function showpic(num) {
+				var i = parseInt(num);
+				if(canput[i] == false) {
+					//还没打开，就显示
+					var a = document.getElementsByClassName("wangxin");
+					var b = shuzu[i];
+					a[i].src = "img/boom/" + b + ".png";
+					cilckcount++;
+					canput[i] = true;
+					if(b == 0) {
+						getkongbai(i);
+					}
+				}
+
+			}
+
+			//在头部显示出剩余炸弹数量
+			function showBoom() {
+				var boomshow = document.getElementById("wangxininput");
+				//boomshow.innerHTML="王鑫最帅!"
+				var count = 0;
+				for(var i = 0; i < flag.length; i++) {
+					if(flag[i] == true) {
+						count++;
+					}
+				}
+				var last = 10 - count;
+				boomshow.innerHTML = "还剩余" + last + "个炸弹!";
+			}
+			//关闭，并重新开始
+			function closeall() {
+				clearInterval(sysotime);
+				//alert(headtime);
+				//alert("请刷新页面重新开始！");
+				window.close();
+				window.open(myHTMLurl);
+			}
+
+			//鼠标点击到了炸弹
+			function clickBoom() {
+				//alert("点到炸弹，你输了！");
+				var boomshow = document.getElementById("wangxininput");
+				boomshow.innerHTML = "点到炸弹，你输了！重新开始";
+				for (var i = 0; i < shuzu.length; i++) {
+					if (shuzu[i]==9) {
+						var a = document.getElementsByClassName("wangxin");
+						a[i].src = "img/boom/9.png";
+					}
+				}
+				
+				for(var i = 0; i < canput.length; i++) {
+					canput[i] = true;
+				}
+				setTimeout("closeall()", 1000);
+			}
+
+			//全部炸弹找出来了，提示成功了
+			function wingame() {
+				var boomshow = document.getElementById("wangxininput");
+				boomshow.innerHTML = "恭喜你成功了,666666！"
+				//alert("恭喜你，你成功了，双击666666！");
+				for(var i = 0; i < canput.length; i++) {
+					canput[i] = true;
+				}
+				clearInterval(sysotime);//停止计时
+				setTimeout("winthegame()", 1000);
+			}
+			
+			function winthegame(){
+				$("#usetime").attr("value",headtime)
+				$("#formwangxin").trigger("submit");
+			}
+
+			//改变时间显示
+			function changeTimeOfHead(){
+				headtime++;
+				var timespan=document.getElementById("timespan");
+				if(headtime<10){
+					timespan.innerHTML="TIME:0"+headtime+"s";
+				}else{
+					timespan.innerHTML="TIME:"+headtime+"s";
+				}
+				
+			}
+
+			//鼠标点击图片的事件
+			function clickimg(num) {
+				//点击图片开始记录时间
+				if(headtime==0){
+					sysotime=window.setInterval("changeTimeOfHead()",1000);
+				}
+				var isflag = document.getElementById("isflag");
+				//alert(isflag.checked)
+				//如果为true，那么就是挖的事件，那么就执行
+				if(isflag.checked) {
+					//点击改变图片
+					//var a = document.getElementsByClassName("wangxin");
+					var i = parseInt(num) - 1;
+					//alert(i);
+					var b = shuzu[i];
+					showpic(i); //展示图片
+					if(b == 9) {
+						clickBoom();
+					}
+					if(b == 0) {
+						getkongbai(i); //当等于空白的时候，展示周围的图片
+					}
+
+					if(cilckcount == 71) {
+						wingame();
+					}
+
+					//a[i].src = "img/boom/" + b + ".png";
+
+					//				var numint=parseInt(num)/10;
+					//				var abcdefg=Math.floor(numint)
+					//				alert(abcdefg);
+				} else {
+					//如果是false，那就说明了为插旗子
+					//点击改变图片
+					//var a = document.getElementsByClassName("wangxin");
+					var i = parseInt(num) - 1;
+					//alert(i);
+					var b = shuzu[i];
+
+					if(canput[i] == false || flag[i] == true) {
+						//还没打开，就显示
+						var a = document.getElementsByClassName("wangxin");
+						//alert(flag[i]);
+						//p判断是否是原来图片
+						if(flag[i] == false) {
+							//是原来图片的话，就插旗子
+							a[i].src = "img/boom/flag.png";
+							canput[i] = true;
+							flag[i] = true;
+							//cilckcount++;
+
+						} else {
+							//不是原来的图片那么就换回原来图片
+							a[i].src = "img/boom/-1.png"
+							canput[i] = false;
+							flag[i] = false;
+							//cilckcount--;
+						}
+						showBoom();
+
+						//Image.src="img/boom/flag.png"						
+					}
+
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<form id="formwangxin" action="#" method="get" style="display: none;">
+			<input type="text" name="username" id="username" value="" />
+			<input type="text" name="usetime" id="usetime" value="" />
+			<input type="submit" value=""/>
+		</form>
+		
+		<table width="500px" align="center">
+			<tr height="35px">
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<!--操作的主体部分-->
+					<div>
+						<!--窗口的头部，用来显示还剩多少雷的-->
+						<div id="" style="width:460px; height: 30px; border: 5px solid gray;font-size: 25px;">
+							<span id="timespan" style="width: 25%; font-size: 13px;">
+								TIME:00s
+							</span>
+							<span id="wangxininput" style="width: 75%;">
+								网页版扫雷小游戏，一共十个雷
+							</span>
+						</div>
+					</div>
+					<div id="largeDiv" style="width:468px; height: 468px; border: 1px solid black;">
+					</div>
+					<div>
+						<input type="radio" name="isflag" id="isflag" value="isflagno" checked=""><img src="img/logo/isflagno.png" /></input>
+						<input type="radio" name="isflag" id="isflag" value="isflagyes"><img src="img/logo/isflagyes.png" /></input>
+					</div>
+
+				</td>
+			</tr>
+		</table>
+
+	</body>
+
+</html>
